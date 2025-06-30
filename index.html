@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UPI Fraud Detection Simulator</title>
+<style>
+:root {
+--primary-gradient: linear-gradient(135deg, #4a90e2, #00c6ff);
+--secondary-gradient: linear-gradient(135deg, #f54ea2, #ff7676);
+--bg-color: #121212;
+--card-bg: #1f1f1f;
+--text-color: #fff;
+--accent-color: #00e0ff;
+--danger-color: #ff4c60;
+--safe-color: #4caf50;
+--font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+* {
+box-sizing: border-box;
+}
+body {
+margin: 0; padding: 0;
+background: var(--bg-color);
+color: var(--text-color);
+font-family: var(--font-family);
+min-height: 100vh;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+padding: 2rem 1rem;
+}
+.container {
+background: var(--card-bg);
+border-radius: 15px;
+box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+max-width: 480px;
+width: 100%;
+padding: 2rem;
+}
+h1 {
+text-align: center;
+background: var(--primary-gradient);
+background-clip: text;
+-webkit-background-clip: text;
+color: transparent;
+font-weight: 900;
+margin-bottom: 1rem;
+user-select: none;
+}
+label {
+display: block;
+margin-bottom: 0.25rem;
+font-weight: 600;
+color: var(--accent-color);
+}
+input[type="number"],
+select {
+width: 100%;
+padding: 0.6rem 0.8rem;
+border-radius: 6px;
+border: 1.8px solid #444;
+background-color: #2a2a2a;
+color: #eee;
+font-size: 1rem;
+transition: border-color 0.3s ease;
+}
+input[type="number"]:focus,
+select:focus {
+border-color: var(--accent-color);
+outline: none;
+}
+.checkbox-group {
+display: flex;
+align-items: center;
+margin-bottom: 1rem;
+}
+.checkbox-group input[type="checkbox"] {
+margin-right: 0.5rem;
+width: 18px;
+height: 18px;
+cursor: pointer;
+}
+button {
+width: 100%;
+background: var(--secondary-gradient);
+border: none;
+border-radius: 8px;
+padding: 0.75rem 0;
+color: white;
+font-weight: 700;
+font-size: 1.15rem;
+cursor: pointer;
+box-shadow: 0 6px 12px rgba(245, 78, 162, 0.6);
+transition: background 0.4s, box-shadow 0.4s;
+user-select: none;
+}
+button:hover {
+background: #ff4c7a;
+box-shadow: 0 8px 20px rgba(255, 76, 122, 0.8);
+}
+button:active {
+transform: scale(0.98);
+}
+.result {
+margin-top: 1.5rem;
+padding: 1rem 1.25rem;
+border-radius: 10px;
+font-size: 1.1rem;
+font-weight: 700;
+user-select: none;
+}
+.result.safe {
+background-color: var(--safe-color);
+color: #0d3b0d;
+}
+.result.fraud {
+background-color: var(--danger-color);
+color: #5f0000;
+}
+@media (max-width: 500px) {
+.container {
+padding: 1.5rem 1rem;
+}
+}
+</style>
+</head>
+<body>
+<div class="container" role="main" aria-label="UPI Fraud Detection Simulator">
+<h1>UPI Fraud Detection</h1>
+<form id="fraud-form" aria-describedby="instruction">
+<label for="amount">Transaction Amount (INR)</label>
+<input type="number" id="amount" name="amount" min="1" max="100000" step="0.01"
+required placeholder="e.g. 2500" />
+<label for="hour">Transaction Hour (0-23)</label>
+<select id="hour" name="hour" required>
+<option value="" disabled selected>Select hour</option>
+</select>
+<label for="device">Device Type</label>
+<select id="device" name="device" required>
+<option value="" disabled selected>Select device</option>
+<option value="mobile_app">Mobile App</option>
+<option value="web">Web</option>
+<option value="ussd">USSD</option>
+</select>
+<label for="merchant">Merchant Category</label>
+<select id="merchant" name="merchant" required>
+<option value="" disabled selected>Select category</option>
+<option value="grocery">Grocery</option>
+<option value="electronics">Electronics</option>
+<option value="food_delivery">Food Delivery</option>
+<option value="travel">Travel</option>
+<option value="utilities">Utilities</option>
+<option value="healthcare">Healthcare</option>
+<option value="education">Education</option>
+<option value="fashion">Fashion</option>
+<option value="entertainment">Entertainment</option>
+<option value="others">Others</option>
+</select>
+<label for="user_txn_24h">User Transactions in Last 24 Hours</label>
+<input type="number" id="user_txn_24h" name="user_txn_24h" min="0" max="1000"
+required placeholder="e.g. 3" />
+<div class="checkbox-group">
+<input type="checkbox" id="location_diff" name="location_diff" />
+<label for="location_diff" style="margin: 0;">Transaction Location Different from
+Usual</label>
+</div>
+<button type="submit" aria-live="polite">Check Fraud</button>
+</form>
+<div id="result" class="result" role="alert" aria-live="assertive" hidden></div>
+</div>
+<script>
+// Fill hour dropdown dynamically
+const hourSelect = document.getElementById('hour');
+for (let i = 0; i <= 23; i++) {
+const option = document.createElement('option');
+option.value = i;
+option.textContent = i;
+hourSelect.appendChild(option);
+}
+// Simple heuristic function simulating ML-based fraud detection
+function detectFraud(data) {
+const reasons = [];
+let score = 0;
+// Rules weights
+if (data.amount > 5000) {
+score += 3;
+reasons.push('High transaction amount');
+}
+if (data.location_diff) {
+score += 4;
+reasons.push('Transaction location differs from usual');
+}
+if (data.user_txn_24h > 20) {
+score += 2;
+reasons.push('High number of transactions in last 24 hours');
+}
+if (['electronics', 'travel', 'others'].includes(data.merchant)) {
+score += 1;
+reasons.push('Merchant category with higher risk');
+}
+if (data.device === 'web') {
+score += 1;
+reasons.push('Transaction from web device (higher risk)');
+}
+// Normalize score to confidence
+const maxScore = 11;
+const confidence = Math.min(score / maxScore, 1);
+return {
+fraud: score >= 5,
+confidence,
+reasons
+};
+}
+const form = document.getElementById('fraud-form');
+const resultDiv = document.getElementById('result');
+form.addEventListener('submit', e => {
+e.preventDefault();
+const formData = new FormData(form);
+const data = {
+amount: parseFloat(formData.get('amount')),
+hour: Number(formData.get('hour')),
+device: formData.get('device'),
+merchant: formData.get('merchant'),
+user_txn_24h: Number(formData.get('user_txn_24h')),
+location_diff: formData.get('location_diff') === 'on'
+};
+const prediction = detectFraud(data);
+if (prediction.fraud) {
+resultDiv.classList.remove('safe');
+resultDiv.classList.add('fraud');
+resultDiv.innerHTML = `<strong>Alert!</strong> The transaction is <strong>likely
+fraudulent</strong> with confidence ${(prediction.confidence*100).toFixed(1)}%.<br/><br/>
+<strong>Reasons:</strong><ul>${prediction.reasons.map(r => `<li>${r}</li>`).join('')}</ul>`;
+} else {
+resultDiv.classList.remove('fraud');
+resultDiv.classList.add('safe');
+resultDiv.textContent = `The transaction appears legitimate with confidence ${(100 -
+prediction.confidence*100).toFixed(1)}%.`;
+}
+resultDiv.hidden = false;
+resultDiv.focus();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+trigger:
+- main
+
+variables:
+  imageName: 'html-app'
+
+pool:
+  name: 'agent10'
+
+steps:
+- task: Docker@2
+  inputs:
+    containerRegistry: 'ACR'
+    repository: '$(imageName)'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+
+- task: Kubernetes@1
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscriptionEndpoint: 'devopsazure'
+    azureResourceGroup: 'aks-resource-group'
+    kubernetesCluster: 'aks-cluster'
+    namespace: 'default'
+    command: 'apply'
+    useConfigurationFile: true
+    configuration: 'manifests/deployment.yaml'

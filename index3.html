@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My Simple HTML App</title>
+<style>
+  body {
+    font-family: sans-serif;
+    text-align: center;
+  }
+  .container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+  }
+  button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Adesso!</h1>
+    <p>This is a basic HTML application.</p>
+    <button id="myButton">Click Me</button>
+    <p id="displayText"></p>
+  </div>
+  <script>
+    const button = document.getElementById("myButton");
+    const displayText = document.getElementById("displayText");
+
+    button.addEventListener("click", function() {
+      displayText.textContent = "Button Clicked!";
+    });
+  </script>
+</body>
+</html>

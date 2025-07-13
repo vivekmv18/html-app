@@ -35,8 +35,8 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ env.webAppName }}
-        slot-name: production
-        resource-group-name: ${{ env.resourceGroup }}
-        package: ${{ env.packagePath }}
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+       app-name: testappazlab
+       slot-name: production
+       resource-group-name: azlab
+       package: D:\a\html-app\html-app\webapp.zip
+       publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}

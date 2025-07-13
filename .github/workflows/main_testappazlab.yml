@@ -37,7 +37,6 @@ jobs:
       with:
         app-name: ${{ env.webAppName }}
         slot-name: production
-        resource-group: ${{ env.resourceGroup }}
+        resource-group-name: ${{ env.resourceGroup }}
         package: ${{ env.packagePath }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-
